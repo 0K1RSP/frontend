@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Puff Clicker Simulator</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+</head>
+<body>
+  <!-- Auth Screen -->
+  <div id="auth-screen" class="screen active">
+    <div class="auth-container">
+      <div class="auth-logo">
+        <div class="logo-puff">🌬️</div>
+        <h1>Puff Clicker</h1>
+        <p class="subtitle">Simulator</p>
+      </div>
+      <div class="auth-form" id="login-form">
+        <h2>Connexion</h2>
+        <input type="text" id="login-username" placeholder="Nom d'utilisateur" autocomplete="username">
+        <input type="password" id="login-password" placeholder="Mot de passe" autocomplete="current-password">
+        <button class="btn btn-primary" onclick="login()">Se connecter</button>
+        <p class="auth-switch">Pas de compte ? <a href="#" onclick="showSignup()">S'inscrire</a></p>
+        <p id="login-error" class="error-msg"></p>
+      </div>
+      <div class="auth-form hidden" id="signup-form">
+        <h2>Inscription</h2>
+        <input type="text" id="signup-username" placeholder="Nom d'utilisateur (3-20 car.)" autocomplete="username">
+        <input type="password" id="signup-password" placeholder="Mot de passe (6+ car.)" autocomplete="new-password">
+        <button class="btn btn-primary" onclick="signup()">S'inscrire</button>
+        <p class="auth-switch">Déjà un compte ? <a href="#" onclick="showLogin()">Se connecter</a></p>
+        <p id="signup-error" class="error-msg"></p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Game Screen -->
+  <div id="game-screen" class="screen">
+    <div class="top-bar">
+      <div class="top-bar-left">
+        <span class="player-name" id="player-name"></span>
+        <span class="player-level" id="player-level">Niv. 1</span>
+        <span class="login-streak" id="login-streak" title="Jours consécutifs">🔥 0</span>
+      </div>
+      <div class="top-bar-center">
+        <div class="currency"><span>🌫️</span><span id="smoke-count">0</span></div>
+        <div class="currency gem-c"><span>💎</span><span id="gem-count">0</span></div>
+      </div>
+      <div class="top-bar-right">
+        <button class="btn-icon" onclick="saveGame()" title="Sauvegarder">💾</button>
+        <button class="btn-icon" onclick="logout()" title="Déconnexion">🚪</button>
+      </div>
+    </div>
+    <div id="announcements" class="announcements hidden"></div>
+    <div id="active-events" class="active-events hidden"></div>
+    <div id="active-buffs" class="active-buffs hidden"></div>
+    <div class="stats-bar">
+      <div class="stat"><span class="stat-label">Par clic</span><span class="stat-value" id="smoke-per-click">1</span></div>
+      <div class="stat"><span class="stat-label">Par sec</span><span class="stat-value" id="smoke-per-second">0</span></div>
+      <div class="stat"><span class="stat-label">Multi</span><span class="stat-value" id="click-multiplier">x1</span></div>
+      <div class="stat"><span class="stat-label">Crit</span><span class="stat-value" id="crit-chance">5%</span></div>
+      <div class="stat"><span class="stat-label">Rebirth</span><span class="stat-value" id="rebirth-count">0</span></div>
+      <div class="stat"><span class="stat-label">Ascension</span><span class="stat-value" id="ascension-count">0</span></div>
+    </div>
+
+    <div class="game-area" id="game-area">
+      <div class="smoke-container" id="smoke-container"></div>
+      <div class="puff-wrapper">
+        <div class="puff-glow" id="puff-glow"></div>
+        <div class="puff-device" id="puff-device" onclick="clickPuff(event)">
+          <span class="puff-emoji" id="puff-emoji">🌫️</span>
+        </div>
+        <div class="puff-name" id="puff-name">Puff Basique</div>
+        <div class="puff-level-display" id="puff-level-display">Niv. 1</div>
+      </div>
+    </div>
+
+    <div class="bottom-nav">
+      <button class="nav-btn active" onclick="showTab('upgrades')" id="tab-upgrades"><span class="nav-icon">⬆️</span><span>Upgrades</span></button>
+      <button class="nav-btn" onclick="showTab('shop')" id="tab-shop"><span class="nav-icon">🛒</span><span>Boutique</span></button>
+      <button class="nav-btn" onclick="showTab('boxes')" id="tab-boxes"><span class="nav-icon">📦</span><span>Boîtes</span></button>
+      <button class="nav-btn" onclick="showTab('liquids')" id="tab-liquids"><span class="nav-icon">🧪</span><span>Liquides</span></button>
+      <button class="nav-btn" onclick="showTab('inventory')" id="tab-inventory"><span class="nav-icon">🎒</span><span>Inventaire</span></button>
+      <button class="nav-btn" onclick="showTab('quests')" id="tab-quests"><span class="nav-icon">📜</span><span>Quêtes</span></button>
+      <button class="nav-btn" onclick="showTab('achievements')" id="tab-achievements"><span class="nav-icon">🏅</span><span>Succès</span></button>
+      <button class="nav-btn" onclick="showTab('leaderboard')" id="tab-leaderboard"><span class="nav-icon">🏆</span><span>Top</span></button>
+      <button class="nav-btn" onclick="showTab('rebirth')" id="tab-rebirth"><span class="nav-icon">🌀</span><span>Rebirth</span></button>
+      <button class="nav-btn" onclick="showTab('ascension')" id="tab-ascension"><span class="nav-icon">⭐</span><span>Ascension</span></button>
+      <button class="nav-btn" onclick="showTab('buffs')" id="tab-buffs"><span class="nav-icon">⚡</span><span>Buffs</span></button>
+    </div>
+
+    <!-- Panels -->
+    <div class="panel active" id="panel-upgrades">
+      <h3>⬆️ Améliorations</h3>
+      <div class="upgrade-categories">
+        <button class="cat-btn active" onclick="filterUpgrades('all',this)">Tout</button>
+        <button class="cat-btn" onclick="filterUpgrades('click',this)">Clic</button>
+        <button class="cat-btn" onclick="filterUpgrades('auto',this)">Auto</button>
+        <button class="cat-btn" onclick="filterUpgrades('multiplier',this)">Multi</button>
+        <button class="cat-btn" onclick="filterUpgrades('critical',this)">Crit</button>
+        <button class="cat-btn" onclick="filterUpgrades('special',this)">Spécial</button>
+      </div>
+      <div id="upgrades-list" class="items-list"></div>
+    </div>
+    <div class="panel" id="panel-shop"><h3>🛒 Boutique de Puffs</h3><div id="shop-list" class="items-grid"></div></div>
+    <div class="panel" id="panel-boxes">
+      <h3>📦 Boîtes à Liquides</h3>
+      <div id="boxes-list" class="items-grid"></div>
+      <div id="box-open-overlay" class="box-open-overlay hidden">
+        <div class="box-open-content">
+          <div class="box-open-emoji" id="box-open-emoji">📦</div>
+          <div class="box-open-result" id="box-open-result"></div>
+          <button class="btn btn-primary" onclick="closeBoxOverlay()">OK</button>
+        </div>
+      </div>
+    </div>
+    <div class="panel" id="panel-liquids">
+      <h3>🧪 Mes Liquides <span id="liquid-mult-display" class="liquid-mult">x1.00</span></h3>
+      <p class="panel-subtitle">Équipe jusqu'à 5 liquides. Vends les inutiles.</p>
+      <div id="liquids-list" class="items-list"></div>
+    </div>
+    <div class="panel" id="panel-inventory"><h3>🎒 Inventaire</h3><div id="inventory-list" class="items-grid"></div></div>
+    <div class="panel" id="panel-quests">
+      <h3>📜 Quêtes</h3>
+      <div class="quest-tabs"><button class="quest-tab active" onclick="filterQuests('daily',this)">Quotidiennes</button><button class="quest-tab" onclick="filterQuests('weekly',this)">Hebdomadaires</button></div>
+      <div id="quests-list" class="items-list"></div>
+    </div>
+    <div class="panel" id="panel-achievements"><h3>🏅 Succès</h3><div id="achievements-list" class="items-list"></div></div>
+    <div class="panel" id="panel-leaderboard">
+      <h3>🏆 Classement</h3>
+      <div class="leaderboard-tabs"><button class="lb-tab active" onclick="loadLeaderboard('totalSmoke',this)">Fumée</button><button class="lb-tab" onclick="loadLeaderboard('totalGems',this)">Gems</button><button class="lb-tab" onclick="loadLeaderboard('level',this)">Niveau</button><button class="lb-tab" onclick="loadLeaderboard('clicks',this)">Clics</button></div>
+      <div id="leaderboard-list" class="items-list"></div>
+    </div>
+    <div class="panel" id="panel-rebirth">
+      <h3>🌀 Renaissance</h3>
+      <div class="prestige-info">
+        <div class="prestige-card"><h4>Renaissances</h4><span class="prestige-number" id="rebirth-display">0</span></div>
+        <div class="prestige-card"><h4>Multiplicateur</h4><span class="prestige-number" id="rebirth-mult-display">x1.00</span></div>
+        <div class="prestige-card"><h4>Fumée Totale</h4><span class="prestige-number" id="total-smoke-display">0</span></div>
+        <div class="prestige-card"><h4>Tokens gagnés</h4><span class="prestige-number" id="rebirth-tokens-preview">0</span></div>
+      </div>
+      <p class="prestige-desc">Reset fumée, upgrades, puffs. Gagne des <strong>gems + tokens + multiplicateur</strong>.<br>Requis : <strong>1M fumée totale</strong>.</p>
+      <button class="btn btn-prestige" id="rebirth-btn" onclick="doPrestige()">🌀 Renaissance</button>
+    </div>
+    <div class="panel" id="panel-ascension">
+      <h3>⭐ Ascension</h3>
+      <div class="prestige-info">
+        <div class="prestige-card"><h4>Ascensions</h4><span class="prestige-number" id="asc-display">0</span></div>
+        <div class="prestige-card"><h4>Multiplicateur</h4><span class="prestige-number" id="asc-mult-display">x1.00</span></div>
+        <div class="prestige-card"><h4>All-Time Fumée</h4><span class="prestige-number" id="all-time-smoke-display">0</span></div>
+        <div class="prestige-card"><h4>Pouvoir</h4><span class="prestige-number" id="asc-power-display">0</span></div>
+      </div>
+      <p class="prestige-desc">Reset <strong>TOTAL</strong> (incluant renaissances). Multiplicateur massif + puffs divines/cosmiques.<br>Requis : <strong>5 renaissances + 1B fumée all-time</strong>.</p>
+      <button class="btn btn-ascension" id="ascension-btn" onclick="doAscension()">⭐ Ascension</button>
+    </div>
+    <div class="panel" id="panel-buffs">
+      <h3>⚡ Buffs Temporaires</h3>
+      <p class="panel-subtitle">Achète des boosts avec tes gems !</p>
+      <div class="items-list">
+        <div class="item-card"><div class="item-info"><div class="item-name">🌫️ Fumée x2</div><div class="item-desc">5 minutes</div></div><div class="item-action"><button class="btn-buy btn-gems" onclick="buyBuff('smoke_x2')">💎 10</button></div></div>
+        <div class="item-card"><div class="item-info"><div class="item-name">🌫️ Fumée x5</div><div class="item-desc">5 minutes</div></div><div class="item-action"><button class="btn-buy btn-gems" onclick="buyBuff('smoke_x5')">💎 25</button></div></div>
+        <div class="item-card"><div class="item-info"><div class="item-name">💥 Crit x2</div><div class="item-desc">5 minutes</div></div><div class="item-action"><button class="btn-buy btn-gems" onclick="buyBuff('crit_x2')">💎 15</button></div></div>
+      </div>
+    </div>
+  </div>
+
+  <div id="click-feedback" class="click-feedback"></div>
+  <script src="main.js"></script>
+</body>
+</html>

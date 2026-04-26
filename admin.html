@@ -1,0 +1,897 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Puff Clicker - Admin Panel</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --bg: #0a0a1a;
+      --bg2: #12122a;
+      --card: #1a1a3a;
+      --card-hover: #222250;
+      --text: #e8e8ff;
+      --text2: #8888aa;
+      --accent: #7c4dff;
+      --accent-glow: rgba(124, 77, 255, 0.4);
+      --accent-light: #b388ff;
+      --success: #00e676;
+      --danger: #ff1744;
+      --warning: #ffab00;
+      --gold: #ffd600;
+      --radius: 12px;
+    }
+
+    body {
+      font-family: 'Poppins', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+    }
+
+    /* Login */
+    .login-overlay {
+      position: fixed;
+      inset: 0;
+      background: var(--bg);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 100;
+    }
+
+    .login-overlay.hidden { display: none; }
+
+    .login-box {
+      background: var(--card);
+      padding: 40px;
+      border-radius: var(--radius);
+      text-align: center;
+      max-width: 400px;
+      width: 90%;
+      border: 1px solid rgba(124, 77, 255, 0.3);
+    }
+
+    .login-box h1 {
+      font-size: 1.8em;
+      margin-bottom: 5px;
+      background: linear-gradient(135deg, var(--accent-light), var(--accent));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .login-box p { color: var(--text2); margin-bottom: 25px; }
+
+    .login-box input {
+      width: 100%;
+      padding: 12px 16px;
+      margin-bottom: 12px;
+      background: var(--bg);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 8px;
+      color: var(--text);
+      font-family: 'Poppins', sans-serif;
+      font-size: 14px;
+    }
+
+    .login-box input:focus {
+      outline: none;
+      border-color: var(--accent);
+      box-shadow: 0 0 10px var(--accent-glow);
+    }
+
+    .login-box button {
+      width: 100%;
+      padding: 12px;
+      background: linear-gradient(135deg, var(--accent), #6200ea);
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-family: 'Poppins', sans-serif;
+      font-size: 15px;
+      font-weight: 600;
+      cursor: pointer;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .login-box button:hover { transform: translateY(-1px); box-shadow: 0 4px 15px var(--accent-glow); }
+
+    .login-error { color: var(--danger); font-size: 13px; margin-top: 10px; min-height: 20px; }
+
+    /* Layout */
+    .admin-layout {
+      display: flex;
+      min-height: 100vh;
+    }
+
+    .sidebar {
+      width: 240px;
+      background: var(--bg2);
+      border-right: 1px solid rgba(124,77,255,0.2);
+      padding: 20px 0;
+      position: fixed;
+      height: 100vh;
+      overflow-y: auto;
+    }
+
+    .sidebar-header {
+      padding: 0 20px 20px;
+      border-bottom: 1px solid rgba(255,255,255,0.05);
+      margin-bottom: 10px;
+    }
+
+    .sidebar-header h2 {
+      font-size: 16px;
+      color: var(--accent-light);
+    }
+
+    .sidebar-header span {
+      font-size: 12px;
+      color: var(--text2);
+    }
+
+    .sidebar-nav button {
+      width: 100%;
+      text-align: left;
+      padding: 12px 20px;
+      background: none;
+      border: none;
+      color: var(--text2);
+      font-family: 'Poppins', sans-serif;
+      font-size: 13px;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .sidebar-nav button:hover { background: var(--card); color: var(--text); }
+    .sidebar-nav button.active { background: var(--accent); color: white; border-radius: 0; }
+
+    .main-content {
+      flex: 1;
+      margin-left: 240px;
+      padding: 30px;
+    }
+
+    .page-title {
+      font-size: 24px;
+      font-weight: 700;
+      margin-bottom: 25px;
+      color: var(--accent-light);
+    }
+
+    /* Dashboard Cards */
+    .dashboard-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 15px;
+      margin-bottom: 30px;
+    }
+
+    .dash-card {
+      background: var(--card);
+      border-radius: var(--radius);
+      padding: 20px;
+      text-align: center;
+      border: 1px solid rgba(124,77,255,0.15);
+    }
+
+    .dash-card .dash-icon { font-size: 30px; margin-bottom: 8px; }
+    .dash-card .dash-value { font-size: 28px; font-weight: 800; color: var(--accent-light); }
+    .dash-card .dash-label { font-size: 12px; color: var(--text2); text-transform: uppercase; letter-spacing: 1px; margin-top: 4px; }
+
+    /* Tables */
+    .admin-table {
+      width: 100%;
+      border-collapse: collapse;
+      background: var(--card);
+      border-radius: var(--radius);
+      overflow: hidden;
+    }
+
+    .admin-table th {
+      background: var(--bg2);
+      padding: 12px 15px;
+      text-align: left;
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--text2);
+      border-bottom: 1px solid rgba(255,255,255,0.05);
+    }
+
+    .admin-table td {
+      padding: 10px 15px;
+      font-size: 13px;
+      border-bottom: 1px solid rgba(255,255,255,0.03);
+    }
+
+    .admin-table tr:hover td { background: var(--card-hover); }
+
+    /* Forms */
+    .admin-form {
+      background: var(--card);
+      border-radius: var(--radius);
+      padding: 25px;
+      margin-bottom: 20px;
+      border: 1px solid rgba(124,77,255,0.15);
+    }
+
+    .admin-form h4 {
+      font-size: 16px;
+      margin-bottom: 15px;
+      color: var(--accent-light);
+    }
+
+    .form-row {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 12px;
+      flex-wrap: wrap;
+      align-items: end;
+    }
+
+    .form-group {
+      flex: 1;
+      min-width: 150px;
+    }
+
+    .form-group label {
+      display: block;
+      font-size: 12px;
+      color: var(--text2);
+      margin-bottom: 5px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .form-group input, .form-group select {
+      width: 100%;
+      padding: 10px 14px;
+      background: var(--bg);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 8px;
+      color: var(--text);
+      font-family: 'Poppins', sans-serif;
+      font-size: 13px;
+    }
+
+    .form-group input:focus, .form-group select:focus {
+      outline: none;
+      border-color: var(--accent);
+    }
+
+    .form-group textarea {
+      width: 100%;
+      padding: 10px 14px;
+      background: var(--bg);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 8px;
+      color: var(--text);
+      font-family: 'Poppins', sans-serif;
+      font-size: 13px;
+      resize: vertical;
+      min-height: 60px;
+    }
+
+    .btn-admin {
+      padding: 10px 20px;
+      border: none;
+      border-radius: 8px;
+      font-family: 'Poppins', sans-serif;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .btn-admin:hover { transform: translateY(-1px); }
+
+    .btn-action {
+      background: linear-gradient(135deg, var(--accent), #6200ea);
+      color: white;
+    }
+
+    .btn-danger {
+      background: linear-gradient(135deg, var(--danger), #d50000);
+      color: white;
+    }
+
+    .btn-success {
+      background: linear-gradient(135deg, var(--success), #00c853);
+      color: #1a1a1a;
+    }
+
+    /* Logs */
+    .log-entry {
+      padding: 8px 12px;
+      background: var(--card);
+      border-radius: 6px;
+      margin-bottom: 6px;
+      font-size: 12px;
+      border-left: 3px solid var(--accent);
+    }
+
+    .log-entry .log-time { color: var(--text2); margin-right: 10px; }
+    .log-entry .log-action { color: var(--accent-light); font-weight: 600; margin-right: 8px; }
+    .log-entry .log-user { color: var(--gold); margin-right: 8px; }
+
+    /* Admin page sections */
+    .admin-section { display: none; }
+    .admin-section.active { display: block; }
+
+    /* Toast */
+    .toast {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      padding: 12px 20px;
+      border-radius: var(--radius);
+      font-size: 14px;
+      font-weight: 600;
+      z-index: 1000;
+      animation: toastIn 0.3s ease;
+      max-width: 350px;
+    }
+
+    .toast-success { background: rgba(0,230,118,0.9); color: white; }
+    .toast-error { background: rgba(255,23,68,0.9); color: white; }
+
+    @keyframes toastIn {
+      from { transform: translateX(100%); opacity: 0; }
+      to { transform: translateX(0); opacity: 1; }
+    }
+
+    /* Online indicator */
+    .online-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      display: inline-block;
+      margin-right: 6px;
+    }
+
+    .online-dot.on { background: var(--success); box-shadow: 0 0 6px var(--success); }
+    .online-dot.off { background: var(--text2); }
+
+    @media (max-width: 768px) {
+      .sidebar { width: 60px; }
+      .sidebar-header h2, .sidebar-header span, .sidebar-nav button span { display: none; }
+      .sidebar-nav button { justify-content: center; padding: 15px; font-size: 18px; }
+      .main-content { margin-left: 60px; padding: 15px; }
+    }
+  </style>
+</head>
+<body>
+  <!-- Login Overlay -->
+  <div class="login-overlay" id="login-overlay">
+    <div class="login-box">
+      <h1>🔒 Admin Panel</h1>
+      <p>Puff Clicker Simulator</p>
+      <input type="text" id="admin-user" placeholder="Nom d'utilisateur" autocomplete="username">
+      <input type="password" id="admin-pass" placeholder="Mot de passe" autocomplete="current-password">
+      <button onclick="adminLogin()">Connexion</button>
+      <p class="login-error" id="admin-error"></p>
+    </div>
+  </div>
+
+  <!-- Admin Layout -->
+  <div class="admin-layout" id="admin-layout" style="display:none;">
+    <div class="sidebar">
+      <div class="sidebar-header">
+        <h2>🎛️ Admin</h2>
+        <span>Puff Clicker</span>
+      </div>
+      <nav class="sidebar-nav">
+        <button class="active" onclick="showSection('dashboard', this)">📊 <span>Dashboard</span></button>
+        <button onclick="showSection('players', this)">👥 <span>Joueurs</span></button>
+        <button onclick="showSection('events', this)">🎉 <span>Événements</span></button>
+        <button onclick="showSection('announce', this)">📢 <span>Annonces</span></button>
+        <button onclick="showSection('give', this)">🎁 <span>Donner Items</span></button>
+        <button onclick="showSection('modify', this)">✏️ <span>Modifier Joueur</span></button>
+        <button onclick="showSection('logs', this)">📋 <span>Logs</span></button>
+        <button onclick="adminLogout()">🚪 <span>Déconnexion</span></button>
+      </nav>
+    </div>
+
+    <div class="main-content">
+      <!-- Dashboard -->
+      <div class="admin-section active" id="section-dashboard">
+        <h2 class="page-title">📊 Dashboard</h2>
+        <div class="dashboard-grid">
+          <div class="dash-card">
+            <div class="dash-icon">👥</div>
+            <div class="dash-value" id="d-total-players">0</div>
+            <div class="dash-label">Joueurs Total</div>
+          </div>
+          <div class="dash-card">
+            <div class="dash-icon">🟢</div>
+            <div class="dash-value" id="d-online-players">0</div>
+            <div class="dash-label">En Ligne</div>
+          </div>
+          <div class="dash-card">
+            <div class="dash-icon">🌫️</div>
+            <div class="dash-value" id="d-total-smoke">0</div>
+            <div class="dash-label">Fumée Totale</div>
+          </div>
+          <div class="dash-card">
+            <div class="dash-icon">💎</div>
+            <div class="dash-value" id="d-total-gems">0</div>
+            <div class="dash-label">Gems Total</div>
+          </div>
+          <div class="dash-card">
+            <div class="dash-icon">🎉</div>
+            <div class="dash-value" id="d-active-events">0</div>
+            <div class="dash-label">Événements Actifs</div>
+          </div>
+        </div>
+
+        <h3 style="margin-bottom:15px;color:var(--accent-light);">🟢 Joueurs en ligne</h3>
+        <div id="online-players-list"></div>
+      </div>
+
+      <!-- Players -->
+      <div class="admin-section" id="section-players">
+        <h2 class="page-title">👥 Tous les Joueurs</h2>
+        <div id="players-table-container"></div>
+      </div>
+
+      <!-- Events -->
+      <div class="admin-section" id="section-events">
+        <h2 class="page-title">🎉 Événements</h2>
+        <div class="admin-form">
+          <h4>Créer un événement</h4>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Type</label>
+              <select id="event-type">
+                <option value="double_smoke">x2 Fumée</option>
+                <option value="double_gems">x2 Gems</option>
+                <option value="bonus_click">Bonus Clic</option>
+                <option value="special_puff">Puff Spéciale</option>
+                <option value="sale">Soldes</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Nom</label>
+              <input type="text" id="event-name" placeholder="Ex: Happy Hour">
+            </div>
+            <div class="form-group">
+              <label>Multiplicateur</label>
+              <input type="number" id="event-mult" value="2" min="1" step="0.5">
+            </div>
+            <div class="form-group">
+              <label>Durée (heures)</label>
+              <input type="number" id="event-duration" value="1" min="0.5" step="0.5">
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Description</label>
+              <input type="text" id="event-desc" placeholder="Description optionnelle">
+            </div>
+          </div>
+          <button class="btn-admin btn-action" onclick="createEvent()">🎉 Lancer l'événement</button>
+        </div>
+
+        <h4 style="margin-bottom:15px;color:var(--accent-light);">Événements récents</h4>
+        <div id="events-list"></div>
+      </div>
+
+      <!-- Announcements -->
+      <div class="admin-section" id="section-announce">
+        <h2 class="page-title">📢 Annonces</h2>
+        <div class="admin-form">
+          <h4>Envoyer une annonce globale</h4>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Message</label>
+              <textarea id="announce-msg" placeholder="Votre annonce ici..."></textarea>
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Type</label>
+              <select id="announce-type">
+                <option value="info">Info</option>
+                <option value="warning">Alerte</option>
+                <option value="event">Événement</option>
+                <option value="update">Mise à jour</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Durée (heures)</label>
+              <input type="number" id="announce-duration" value="24" min="1">
+            </div>
+          </div>
+          <button class="btn-admin btn-action" onclick="sendAnnouncement()">📢 Envoyer</button>
+        </div>
+      </div>
+
+      <!-- Give Items -->
+      <div class="admin-section" id="section-give">
+        <h2 class="page-title">🎁 Donner des Items</h2>
+        <div class="admin-form">
+          <h4>Donner fumée / gems / puffs à un joueur</h4>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Joueur (ID)</label>
+              <select id="give-player"></select>
+            </div>
+            <div class="form-group">
+              <label>Type</label>
+              <select id="give-type" onchange="toggleGiveFields()">
+                <option value="smoke">Fumée</option>
+                <option value="gems">Gems</option>
+                <option value="puff">Puff</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-row" id="give-amount-row">
+            <div class="form-group">
+              <label>Quantité</label>
+              <input type="number" id="give-amount" value="1000" min="1">
+            </div>
+          </div>
+          <div class="form-row hidden" id="give-puff-row">
+            <div class="form-group">
+              <label>Puff ID</label>
+              <select id="give-puff-id">
+                <option value="cool_mint">Cool Mint</option>
+                <option value="tropical">Tropical Vibes</option>
+                <option value="blueberry">Blueberry Blast</option>
+                <option value="strawberry">Strawberry Cloud</option>
+                <option value="cotton_candy">Cotton Candy</option>
+                <option value="dragon_fruit">Dragon Fruit</option>
+                <option value="galaxy">Galaxy Nebula</option>
+                <option value="golden">Golden Vape</option>
+                <option value="mythic_cloud">Mythic Cloud</option>
+              </select>
+            </div>
+          </div>
+          <button class="btn-admin btn-success" onclick="giveItems()">🎁 Donner</button>
+        </div>
+      </div>
+
+      <!-- Modify Player -->
+      <div class="admin-section" id="section-modify">
+        <h2 class="page-title">✏️ Modifier un Joueur</h2>
+        <div class="admin-form">
+          <h4>Modifier les stats d'un joueur</h4>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Joueur</label>
+              <select id="modify-player"></select>
+            </div>
+            <div class="form-group">
+              <label>Champ</label>
+              <select id="modify-field">
+                <option value="smoke">Fumée</option>
+                <option value="gems">Gems</option>
+                <option value="totalSmoke">Fumée Totale</option>
+                <option value="totalGems">Gems Totaux</option>
+                <option value="smokePerClick">Fumée/Clic</option>
+                <option value="smokePerSecond">Fumée/Sec</option>
+                <option value="clickMultiplier">Multiplicateur</option>
+                <option value="prestigeLevel">Niveau Prestige</option>
+                <option value="prestigeMultiplier">Multi Prestige</option>
+                <option value="level">Niveau</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Nouvelle valeur</label>
+              <input type="number" id="modify-value" value="0">
+            </div>
+          </div>
+          <button class="btn-admin btn-action" onclick="modifyPlayer()">✏️ Modifier</button>
+        </div>
+      </div>
+
+      <!-- Logs -->
+      <div class="admin-section" id="section-logs">
+        <h2 class="page-title">📋 Logs Serveur</h2>
+        <div id="logs-list"></div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let adminToken = localStorage.getItem('puff_admin_token');
+
+    function formatNum(n) {
+      if (!n) return '0';
+      if (n >= 1e12) return (n/1e12).toFixed(1) + 'T';
+      if (n >= 1e9) return (n/1e9).toFixed(1) + 'B';
+      if (n >= 1e6) return (n/1e6).toFixed(1) + 'M';
+      if (n >= 1e3) return (n/1e3).toFixed(1) + 'K';
+      return Math.floor(n).toLocaleString();
+    }
+
+    function toast(msg, type = 'success') {
+      const t = document.createElement('div');
+      t.className = `toast toast-${type}`;
+      t.textContent = msg;
+      document.body.appendChild(t);
+      setTimeout(() => t.remove(), 3000);
+    }
+
+    async function adminApi(endpoint, method = 'GET', body = null) {
+      const opt = { method, headers: { 'Content-Type': 'application/json' } };
+      if (adminToken) opt.headers['Authorization'] = `Bearer ${adminToken}`;
+      if (body) opt.body = JSON.stringify(body);
+      const res = await fetch(endpoint, opt);
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Erreur');
+      return data;
+    }
+
+    async function adminLogin() {
+      const user = document.getElementById('admin-user').value.trim();
+      const pass = document.getElementById('admin-pass').value;
+      const err = document.getElementById('admin-error');
+      err.textContent = '';
+
+      try {
+        const data = await adminApi('/auth/login', 'POST', { username: user, password: pass });
+        if (data.user.role !== 'admin') {
+          err.textContent = 'Accès refusé. Vous n\'êtes pas admin.';
+          return;
+        }
+        adminToken = data.token;
+        localStorage.setItem('puff_admin_token', adminToken);
+        showAdmin();
+      } catch (e) {
+        err.textContent = e.message;
+      }
+    }
+
+    function adminLogout() {
+      adminToken = null;
+      localStorage.removeItem('puff_admin_token');
+      document.getElementById('admin-layout').style.display = 'none';
+      document.getElementById('login-overlay').classList.remove('hidden');
+    }
+
+    async function showAdmin() {
+      document.getElementById('login-overlay').classList.add('hidden');
+      document.getElementById('admin-layout').style.display = 'flex';
+      await loadDashboard();
+    }
+
+    function showSection(name, btn) {
+      document.querySelectorAll('.admin-section').forEach(s => s.classList.remove('active'));
+      document.querySelectorAll('.sidebar-nav button').forEach(b => b.classList.remove('active'));
+      document.getElementById(`section-${name}`).classList.add('active');
+      if (btn) btn.classList.add('active');
+
+      switch(name) {
+        case 'dashboard': loadDashboard(); break;
+        case 'players': loadPlayers(); break;
+        case 'events': loadEvents(); break;
+        case 'give': loadPlayersDropdown('give-player'); break;
+        case 'modify': loadPlayersDropdown('modify-player'); break;
+        case 'logs': loadLogs(); break;
+      }
+    }
+
+    async function loadDashboard() {
+      try {
+        const data = await adminApi('/admin/dashboard');
+        document.getElementById('d-total-players').textContent = formatNum(data.totalPlayers);
+        document.getElementById('d-online-players').textContent = formatNum(data.onlinePlayers);
+        document.getElementById('d-total-smoke').textContent = formatNum(data.totalSmoke);
+        document.getElementById('d-total-gems').textContent = formatNum(data.totalGems);
+        document.getElementById('d-active-events').textContent = data.activeEvents;
+
+        const online = await adminApi('/admin/online');
+        const container = document.getElementById('online-players-list');
+        if (online.players.length === 0) {
+          container.innerHTML = '<p style="color:var(--text2)">Aucun joueur en ligne.</p>';
+        } else {
+          container.innerHTML = online.players.map(p => `
+            <div style="display:flex;align-items:center;gap:10px;padding:8px 12px;background:var(--card);border-radius:8px;margin-bottom:6px;">
+              <span class="online-dot on"></span>
+              <strong>${p.username}</strong>
+              <span style="color:var(--text2)">Niv. ${p.level}</span>
+              <span style="color:var(--text2)">🌫️ ${formatNum(p.smoke)}</span>
+              <span style="color:var(--text2)">💎 ${formatNum(p.gems)}</span>
+            </div>
+          `).join('');
+        }
+      } catch (e) {
+        toast(e.message, 'error');
+      }
+    }
+
+    async function loadPlayers() {
+      try {
+        const data = await adminApi('/admin/players');
+        const container = document.getElementById('players-table-container');
+        container.innerHTML = `
+          <table class="admin-table">
+            <thead><tr>
+              <th>Statut</th><th>Utilisateur</th><th>Niveau</th><th>Fumée</th><th>Gems</th><th>Prestige</th><th>Puff</th><th>Dernière co.</th>
+            </tr></thead>
+            <tbody>
+              ${data.players.map(p => `
+                <tr>
+                  <td><span class="online-dot ${p.online ? 'on' : 'off'}"></span></td>
+                  <td><strong>${p.username}</strong> ${p.role === 'admin' ? '👑' : ''}</td>
+                  <td>${p.level}</td>
+                  <td>🌫️ ${formatNum(p.smoke)} <span style="color:var(--text2)">(${formatNum(p.totalSmoke)})</span></td>
+                  <td>💎 ${formatNum(p.gems)}</td>
+                  <td>⭐ ${p.prestigeLevel} (x${p.prestigeMultiplier})</td>
+                  <td>${p.currentPuff}</td>
+                  <td style="color:var(--text2)">${new Date(p.lastSave).toLocaleString('fr-FR')}</td>
+                </tr>
+              `).join('')}
+            </tbody>
+          </table>
+        `;
+      } catch (e) {
+        toast(e.message, 'error');
+      }
+    }
+
+    async function loadPlayersDropdown(selectId) {
+      try {
+        const data = await adminApi('/admin/players');
+        const select = document.getElementById(selectId);
+        select.innerHTML = data.players.map(p =>
+          `<option value="${p._id}">${p.username} (Niv.${p.level})</option>`
+        ).join('');
+      } catch (e) {
+        toast(e.message, 'error');
+      }
+    }
+
+    async function createEvent() {
+      try {
+        const data = await adminApi('/admin/createEvent', 'POST', {
+          type: document.getElementById('event-type').value,
+          name: document.getElementById('event-name').value,
+          description: document.getElementById('event-desc').value,
+          bonusMultiplier: parseFloat(document.getElementById('event-mult').value),
+          durationHours: parseFloat(document.getElementById('event-duration').value)
+        });
+        toast('Événement créé ! ' + data.event.name);
+        loadEvents();
+      } catch (e) {
+        toast(e.message, 'error');
+      }
+    }
+
+    async function endEvent(eventId) {
+      try {
+        await adminApi('/admin/endEvent', 'POST', { eventId });
+        toast('Événement terminé.');
+        loadEvents();
+      } catch (e) {
+        toast(e.message, 'error');
+      }
+    }
+
+    async function loadEvents() {
+      try {
+        const data = await adminApi('/admin/events');
+        const container = document.getElementById('events-list');
+        container.innerHTML = data.events.map(e => {
+          const isActive = e.active && new Date(e.endTime) > new Date();
+          return `
+            <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 15px;background:var(--card);border-radius:8px;margin-bottom:8px;border-left:3px solid ${isActive ? 'var(--success)' : 'var(--text2)'}">
+              <div>
+                <strong>${e.name}</strong> <span style="color:var(--text2)">(${e.type})</span>
+                <div style="font-size:12px;color:var(--text2)">x${e.bonusMultiplier} • ${new Date(e.startTime).toLocaleString('fr-FR')} → ${new Date(e.endTime).toLocaleString('fr-FR')}</div>
+              </div>
+              <div>
+                ${isActive
+                  ? `<span style="color:var(--success);margin-right:10px;">🟢 Actif</span><button class="btn-admin btn-danger" onclick="endEvent('${e.eventId}')">Terminer</button>`
+                  : '<span style="color:var(--text2);">⚪ Terminé</span>'
+                }
+              </div>
+            </div>
+          `;
+        }).join('');
+      } catch (e) {
+        toast(e.message, 'error');
+      }
+    }
+
+    async function sendAnnouncement() {
+      try {
+        await adminApi('/admin/announcement', 'POST', {
+          message: document.getElementById('announce-msg').value,
+          type: document.getElementById('announce-type').value,
+          durationHours: parseInt(document.getElementById('announce-duration').value)
+        });
+        toast('Annonce envoyée !');
+        document.getElementById('announce-msg').value = '';
+      } catch (e) {
+        toast(e.message, 'error');
+      }
+    }
+
+    function toggleGiveFields() {
+      const type = document.getElementById('give-type').value;
+      document.getElementById('give-amount-row').classList.toggle('hidden', type === 'puff');
+      document.getElementById('give-puff-row').classList.toggle('hidden', type !== 'puff');
+    }
+
+    async function giveItems() {
+      const type = document.getElementById('give-type').value;
+      const body = {
+        playerId: document.getElementById('give-player').value,
+        type
+      };
+      if (type === 'puff') {
+        body.puffId = document.getElementById('give-puff-id').value;
+      } else {
+        body.amount = parseInt(document.getElementById('give-amount').value);
+      }
+
+      try {
+        await adminApi('/admin/giveItems', 'POST', body);
+        toast('Items donnés avec succès !');
+      } catch (e) {
+        toast(e.message, 'error');
+      }
+    }
+
+    async function modifyPlayer() {
+      try {
+        await adminApi('/admin/modifyPlayer', 'POST', {
+          playerId: document.getElementById('modify-player').value,
+          field: document.getElementById('modify-field').value,
+          value: parseFloat(document.getElementById('modify-value').value)
+        });
+        toast('Joueur modifié avec succès !');
+      } catch (e) {
+        toast(e.message, 'error');
+      }
+    }
+
+    async function loadLogs() {
+      try {
+        const data = await adminApi('/admin/logs?limit=100');
+        const container = document.getElementById('logs-list');
+        container.innerHTML = data.logs.map(l => `
+          <div class="log-entry">
+            <span class="log-time">${new Date(l.timestamp).toLocaleString('fr-FR')}</span>
+            <span class="log-action">[${l.action}]</span>
+            <span class="log-user">${l.username || ''}</span>
+            <span>${l.details || ''}</span>
+          </div>
+        `).join('');
+      } catch (e) {
+        toast(e.message, 'error');
+      }
+    }
+
+    // Enter key handlers
+    document.getElementById('admin-pass').addEventListener('keypress', e => {
+      if (e.key === 'Enter') adminLogin();
+    });
+
+    // Auto-login
+    if (adminToken) {
+      adminApi('/admin/dashboard').then(() => showAdmin()).catch(() => {
+        adminToken = null;
+        localStorage.removeItem('puff_admin_token');
+      });
+    }
+
+    // CSS hidden class
+    const style = document.createElement('style');
+    style.textContent = '.hidden { display: none !important; }';
+    document.head.appendChild(style);
+  </script>
+</body>
+</html>
