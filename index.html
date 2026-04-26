@@ -22,7 +22,7 @@
         <h2>Connexion</h2>
         <input type="text" id="login-username" placeholder="Nom d'utilisateur" autocomplete="username">
         <input type="password" id="login-password" placeholder="Mot de passe" autocomplete="current-password">
-        <button class="btn btn-primary" onclick="login()">Se connecter</button>
+        <button class="btn btn-primary" id="login-btn">Se connecter</button>
         <p class="auth-switch">Pas de compte ? <a href="javascript:void(0)" onclick="showSignup(); return false;">S'inscrire</a></p>
         <p id="login-error" class="error-msg"></p>
       </div>
@@ -30,7 +30,7 @@
         <h2>Inscription</h2>
         <input type="text" id="signup-username" placeholder="Nom d'utilisateur (3-20 car.)" autocomplete="username">
         <input type="password" id="signup-password" placeholder="Mot de passe (6+ car.)" autocomplete="new-password">
-        <button class="btn btn-primary" onclick="signup()">S'inscrire</button>
+        <button class="btn btn-primary" id="signup-btn">S'inscrire</button>
         <p class="auth-switch">Déjà un compte ? <a href="javascript:void(0)" onclick="showLogin(); return false;">Se connecter</a></p>
         <p id="signup-error" class="error-msg"></p>
       </div>
@@ -198,29 +198,23 @@
         }
       });
 
-      document.getElementById('login-form')?.querySelector('.btn.btn-primary')?.addEventListener('click', async (e) => {
-        e.preventDefault();
-        const username = document.getElementById('login-username').value.trim();
-        const password = document.getElementById('login-password').value;
-        const errorEl = document.getElementById('login-error');
-        if (!username || !password) {
-          errorEl.textContent = 'Remplis tous les champs.';
-          return;
-        }
-        errorEl.textContent = '';
-      });
+      // Bind auth buttons without inline global dependency (fixes "signup is not defined")
+      const loginBtn = document.getElementById('login-btn');
+      const signupBtn = document.getElementById('signup-btn');
 
-      document.getElementById('signup-form')?.querySelector('.btn.btn-primary')?.addEventListener('click', async (e) => {
-        e.preventDefault();
-        const username = document.getElementById('signup-username').value.trim();
-        const password = document.getElementById('signup-password').value;
-        const errorEl = document.getElementById('signup-error');
-        if (!username || !password) {
-          errorEl.textContent = 'Remplis tous les champs.';
-          return;
-        }
-        errorEl.textContent = '';
-      });
+      if (loginBtn) {
+        loginBtn.addEventListener('click', (e) => {
+          e.preventDefault();
+          if (typeof window.login === 'function') window.login();
+        });
+      }
+
+      if (signupBtn) {
+        signupBtn.addEventListener('click', (e) => {
+          e.preventDefault();
+          if (typeof window.signup === 'function') window.signup();
+        });
+      }
     });
   </script>
 </body>
