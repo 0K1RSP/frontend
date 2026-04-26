@@ -623,13 +623,24 @@
       setTimeout(() => t.remove(), 3000);
     }
 
+    const ADMIN_API_BASE = 'https://backend-rnxv.onrender.com';
+
     async function adminApi(endpoint, method = 'GET', body = null) {
       const opt = { method, headers: { 'Content-Type': 'application/json' } };
       if (adminToken) opt.headers['Authorization'] = `Bearer ${adminToken}`;
       if (body) opt.body = JSON.stringify(body);
-      const res = await fetch(endpoint, opt);
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || 'Erreur');
+
+      const res = await fetch(`${ADMIN_API_BASE}${endpoint}`, opt);
+
+      let data = {};
+      const text = await res.text();
+      try {
+        data = text ? JSON.parse(text) : {};
+      } catch {
+        throw new Error(text || `Erreur ${res.status}`);
+      }
+
+      if (!res.ok) throw new Error(data.error || `Erreur ${res.status}`);
       return data;
     }
 
