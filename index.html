@@ -23,7 +23,7 @@
         <input type="text" id="login-username" placeholder="Nom d'utilisateur" autocomplete="username">
         <input type="password" id="login-password" placeholder="Mot de passe" autocomplete="current-password">
         <button class="btn btn-primary" id="login-btn">Se connecter</button>
-        <p class="auth-switch">Pas de compte ? <a href="javascript:void(0)" onclick="showSignup(); return false;">S'inscrire</a></p>
+        <p class="auth-switch">Pas de compte ? <a href="javascript:void(0)" id="show-signup-link">S'inscrire</a></p>
         <p id="login-error" class="error-msg"></p>
       </div>
       <div class="auth-form hidden" id="signup-form">
@@ -31,7 +31,7 @@
         <input type="text" id="signup-username" placeholder="Nom d'utilisateur (3-20 car.)" autocomplete="username">
         <input type="password" id="signup-password" placeholder="Mot de passe (6+ car.)" autocomplete="new-password">
         <button class="btn btn-primary" id="signup-btn">S'inscrire</button>
-        <p class="auth-switch">Déjà un compte ? <a href="javascript:void(0)" onclick="showLogin(); return false;">Se connecter</a></p>
+        <p class="auth-switch">Déjà un compte ? <a href="javascript:void(0)" id="show-login-link">Se connecter</a></p>
         <p id="signup-error" class="error-msg"></p>
       </div>
     </div>
@@ -189,14 +189,11 @@
         return false;
       };
 
-      document.querySelectorAll('.auth-switch a').forEach((a) => {
-        const txt = (a.textContent || '').toLowerCase();
-        if (txt.includes("s'inscrire")) {
-          a.addEventListener('click', showSignupFallback);
-        } else if (txt.includes('se connecter')) {
-          a.addEventListener('click', showLoginFallback);
-        }
-      });
+      const showSignupLink = document.getElementById('show-signup-link');
+      const showLoginLink = document.getElementById('show-login-link');
+
+      if (showSignupLink) showSignupLink.addEventListener('click', showSignupFallback);
+      if (showLoginLink) showLoginLink.addEventListener('click', showLoginFallback);
 
       // Bind auth buttons without inline global dependency (fixes "signup is not defined")
       const loginBtn = document.getElementById('login-btn');

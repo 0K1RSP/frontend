@@ -205,23 +205,6 @@ function updateUI() {
   document.getElementById('asc-power-display').textContent = formatNumber(u.ascensionPower);
   document.getElementById('ascension-btn').disabled = u.rebirths < 5 || u.allTimeSmoke < 1000000000;
 
-  // Update puff display
-  const currentPuff = gameData.puffs.find(p => p.puffId === u.currentPuff);
-  if (currentPuff) {
-    document.getElementById('puff-emoji').textContent = currentPuff.emoji;
-    document.getElementById('puff-name').textContent = currentPuff.name;
-    document.getElementById('puff-glow').style.background =
-      `radial-gradient(circle, ${currentPuff.color}66 0%, transparent 70%)`;
-    document.getElementById('puff-device').style.borderColor = currentPuff.color;
-  }
-
-  // Update prestige panel
-  document.getElementById('prestige-display').textContent = u.prestigeLevel;
-  document.getElementById('prestige-mult-display').textContent = `x${u.prestigeMultiplier.toFixed(2)}`;
-  document.getElementById('total-smoke-display').textContent = formatNumber(u.totalSmoke);
-  const gemsPreview = Math.floor(Math.sqrt(u.totalSmoke / 1000));
-  document.getElementById('prestige-gems-preview').textContent = formatNumber(gemsPreview);
-  document.getElementById('prestige-btn').disabled = u.totalSmoke < 1000000;
 }
 
 // ===== CLICK PUFF =====
