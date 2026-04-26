@@ -1,5 +1,5 @@
 // ===== PUFF CLICKER SIMULATOR - MAIN JS =====
-const API = '';
+const API = 'https://backend-rnxv.onrender.com';
 let token = localStorage.getItem('puff_token');
 let gameData = null;
 let autoSaveInterval = null;
