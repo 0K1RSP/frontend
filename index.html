@@ -23,7 +23,7 @@
         <input type="text" id="login-username" placeholder="Nom d'utilisateur" autocomplete="username">
         <input type="password" id="login-password" placeholder="Mot de passe" autocomplete="current-password">
         <button class="btn btn-primary" onclick="login()">Se connecter</button>
-        <p class="auth-switch">Pas de compte ? <a href="#" onclick="showSignup()">S'inscrire</a></p>
+        <p class="auth-switch">Pas de compte ? <a href="#" onclick="event.preventDefault(); showSignup()">S'inscrire</a></p>
         <p id="login-error" class="error-msg"></p>
       </div>
       <div class="auth-form hidden" id="signup-form">
@@ -31,7 +31,7 @@
         <input type="text" id="signup-username" placeholder="Nom d'utilisateur (3-20 car.)" autocomplete="username">
         <input type="password" id="signup-password" placeholder="Mot de passe (6+ car.)" autocomplete="new-password">
         <button class="btn btn-primary" onclick="signup()">S'inscrire</button>
-        <p class="auth-switch">Déjà un compte ? <a href="#" onclick="showLogin()">Se connecter</a></p>
+        <p class="auth-switch">Déjà un compte ? <a href="#" onclick="event.preventDefault(); showLogin()">Se connecter</a></p>
         <p id="signup-error" class="error-msg"></p>
       </div>
     </div>
